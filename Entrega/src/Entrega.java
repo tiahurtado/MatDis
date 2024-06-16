@@ -67,6 +67,8 @@ class Entrega {
      */
     static class Tema1 {
 
+        
+
         /*
          * Donat n > 1, en quants de casos (segons els valors de veritat de les proposicions p1,...,pn)
          * la proposició (...((p1 -> p2) -> p3) -> ...) -> pn és certa?
@@ -81,21 +83,89 @@ class Entrega {
          * És cert que ∀x : P(x) -> ∃!y : Q(x,y) ?
          */
         static boolean exercici2(int[] universe, Predicate<Integer> p, BiPredicate<Integer, Integer> q) {
-            return false; // TODO
+            int contador;
+      for (int x : universe) {
+
+        if (p.test(x)) {
+          contador = 0;
+
+          for (int y : universe) {
+
+            if (q.test(x, y)) {
+
+              contador++;
+
+            }
+          }
+          if (contador != 1) {
+            return false;
+          }
+        }
+
+      }
+
+      return true; // TODO
+          
         }
 
         /*
          * És cert que ∃x : ∀y : Q(x, y) -> P(x) ?
          */
         static boolean exercici3(int[] universe, Predicate<Integer> p, BiPredicate<Integer, Integer> q) {
-            return false; // TODO
+            boolean condicion;
+      for (int x : universe) {
+        condicion = true;
+        for (int y : universe) {
+
+          if (q.test(x, y) && !p.test(x)) {
+            condicion = false; // hemos encontrado una x que no lo cumple
+
+          }
+
+        }
+        if (condicion) {
+          return true;
+        }
+
+      }
+
+      return false; // TODO
         }
 
         /*
          * És cert que ∃x : ∃!y : ∀z : P(x,z) <-> Q(y,z) ?
          */
         static boolean exercici4(int[] universe, BiPredicate<Integer, Integer> p, BiPredicate<Integer, Integer> q) {
-            return false; // TODO
+           boolean condicion;
+      int contador;
+      for (int x : universe) {
+
+        contador = 0;
+        condicion = true;
+        for (int y : universe) {
+
+          for (int z : universe) {
+
+            if ((p.test(x, z) ^ q.test(y, z))) {
+              condicion = false;
+              break;
+            }
+
+          }
+
+          if (condicion) {
+            contador++;
+          }
+          if (contador != 1) { // no és único
+            break;
+          }
+        }
+
+        if (contador == 1) {
+          return true;
+        }
+      }
+      return false; // TODO
         }
 
         /*
@@ -200,6 +270,249 @@ class Entrega {
      * f a x, és a dir, "f(x)" on x és d'A i el resultat f.apply(x) és de B, s'escriu f.apply(x).
      */
     static class Tema2 {
+                  //Metodos para la resolucion de los ejercicios//
+
+     /**
+     * Realiza la diferencia de dos conjuntos 
+     * @param a Conjunto 1 
+     * @param b Conjunto 2
+     * @return Diferencia de conjuntos --> a\b
+     */
+
+     static ArrayList<Integer> Diferencia(int[] a, int[] b) {
+      
+      ArrayList<Integer> lista  = new ArrayList<Integer>();
+      
+      //Añadimos todo a
+      for(Integer x:a){
+       lista.add(x);    
+      }
+      //eliminamos elementos que tambien estan en b 
+      for(Integer x:b){
+        lista.remove(x);
+      }
+      
+      return lista;
+    }
+
+
+
+     /**
+     * Realiza la union de dos conjuntos 
+     * @param a Conjunto 1 
+     * @param b Conjunto 2
+     * @return Union de conjuntos
+     */
+     static ArrayList<Integer> Union(int[] a, int[] b) {
+
+      ArrayList<Integer> lista = new  ArrayList<Integer>();
+      boolean dentro;
+     
+      //metemos todos los elementos de a 
+      for (Integer x : a) {
+        lista.add(x);
+      }
+
+     //metemos los elementos de b que no esten en la lista
+      for(Integer y:b){
+      
+        if (!lista.contains(y)) {
+          lista.add(y);
+        }
+      }
+      return lista;
+    }
+
+
+
+
+     /**
+     * Comprueba que un elemento pertenezca a un conjunto
+     * @param e Elemento a comprobar
+     * @param rel Conjunto sobre el que se va a comprobar
+     * @return Si el elemento está contenido en el conjunto o no
+     */
+    private static boolean contains(int[] e, int[][] rel){
+      
+
+      for(int[] y : rel){
+        if(Arrays.equals(y, e)){
+          return true;
+        }
+      }
+      return false;
+    }
+
+ /**
+     * Comprueba que un subconjunto  pertenezca a un conjunto
+     * @param x Elemento del subconjunto
+     * @param y Elemento del subconjunto
+     * @param rel lista
+     * @return Si el subconjunto está contenido en el conjunto o no
+     */
+    private static boolean contiene(List<int[]> lista , int x, int y ){
+    boolean encontrado = false;
+
+    for (int[] conjuntos : lista) {
+      if (conjuntos[0] == x && conjuntos[1] == y) {
+        encontrado = true;
+          return encontrado;
+      }
+  }
+  return encontrado;
+    }
+
+
+//calcula el cardinal de una clausura de Equivalencia//
+
+  private  static int Cardinal_Clausura_Equivalencia(int[] e, int[][] rel ){
+      List<int[]> Clausura_Equivalencia = new ArrayList<int[]>();
+      List<int[]> Clausura_Reflexiva = new ArrayList<int[]>();
+      List<int[]> Clausura_Simetrica = new ArrayList<int[]>();
+ 
+      //añadimos los conjuntos de la relacion//
+      for(int[] conjunto: rel){
+        Clausura_Equivalencia.add(conjunto);
+      }
+
+     //Reflexiva//
+
+    for (int x: e) {
+     int[] conjunto =  new int[]{x,x};
+
+      if(!contiene(Clausura_Equivalencia,x,x)){
+        Clausura_Reflexiva.add(conjunto);
+      }
+      
+    }
+    Clausura_Equivalencia.addAll(Clausura_Reflexiva);
+
+
+    //Simetrica//
+for (int[] conjunto : Clausura_Equivalencia) {
+  int[] aux =  new int[2];
+aux[0]= conjunto[1];
+aux[1]= conjunto[0];
+
+if (!contiene(Clausura_Equivalencia, aux[0],aux[1])&&(aux[0]!=aux[1])) {
+  Clausura_Simetrica.add(aux);
+}
+
+}
+Clausura_Equivalencia.addAll(Clausura_Simetrica);
+
+//Transitiva//
+
+boolean cambio;
+do {
+  cambio = false;
+    List<int[]> Clausura_Transitiva = new ArrayList<>();
+    for (int[] p1 : Clausura_Equivalencia) {
+        for (int[] p2 : Clausura_Equivalencia) {
+            if (p1[1] == p2[0]) {
+                if (!contiene(Clausura_Equivalencia, p1[0], p2[1]) && !contiene(Clausura_Transitiva, p1[0], p2[1])) {
+                  Clausura_Transitiva.add(new int[]{p1[0], p2[1]});
+                    cambio = true;
+                }
+            }
+        }
+    }
+    Clausura_Equivalencia.addAll(Clausura_Transitiva);
+} while (cambio);
+
+
+      return Clausura_Equivalencia.size();
+
+
+    }
+
+      /**
+     * Comprueba que una relación sea reflexiva sobre un conjunto dado
+     * @param a Conjunto original
+     * @param rel Conjunto relación
+     * @return Si la relación es reflexiva o no
+     */
+    private static boolean reflexiva(int[] a, int[][] rel){
+      boolean reflex = true;
+      int[] aux = {0, 0};
+      for(int x : a){
+        aux[0] = x;
+        aux[1] = x;
+        if(!contains(aux, rel)){
+          reflex = false;
+          break;
+        }
+      }
+      return reflex;
+    }
+
+ /**
+     * Comprueba que una relación sea transitiva
+     * @param rel Conjunto relación
+     * @return Si la relación es transitiva o no
+     */
+    private static boolean transitiva(int[][] rel){
+    
+
+      boolean trans = true;
+      int[] aux = {0, 0};
+      for(int[] x : rel){
+        for(int[] y : rel){
+          if(x[1]==y[0]){
+            aux[0] = x[0];
+            aux[1] = y[1];
+            if(!contains(aux, rel)){
+              trans = false;
+              break;
+            }
+          }
+        }
+      }
+      return trans;
+    }
+    /** 
+      * Comprueba que una relación sea Antisimetrica
+     * @param rel Conjunto relación
+     * @return Si la relación es Antisimetrica o no
+     */
+    private static boolean Antisimetrica(int[][] rel){
+      boolean Antsim = true;
+      List<int[]> lista = new  ArrayList<int[]>(Arrays.asList(rel));
+
+      for (int[] p1 : lista) {
+
+        if (contiene(lista, p1[1], p1[0]) && p1[0] != p1[1]) {
+          Antsim=false;
+            return Antsim;
+        }
+    }
+      return Antsim;
+    }
+
+ /** 
+      * Comprueba que una relación sea de Orden Total
+     * @param rel Conjunto relación
+     * @return Si la relación es de Orden Total o no
+     */
+  
+    private static boolean OrdTotal(int [] e, int[][] rel){
+      boolean Total = true;
+      List<int[]> lista = new  ArrayList<int[]>(Arrays.asList(rel));
+
+      for (int i = 0; i < e.length; i++) {
+        for (int j = i + 1; j < e.length; j++) {
+            if (!contiene(lista, e[i], e[j]) && !contiene(lista, e[j], e[i])) {
+            Total = false;
+            return Total;
+               
+            }
+        }
+    }
+
+      return Total;
+    }
+
+        
 
         /*
          * Calculau el nombre d'elements del conjunt (a u b) × (a \ c)
@@ -207,7 +520,10 @@ class Entrega {
          * Podeu soposar que `a`, `b` i `c` estan ordenats de menor a major.
          */
         static int exercici1(int[] a, int[] b, int[] c) {
-            return -1; // TODO
+            ArrayList<Integer> Resultado_Union = Union(a, b);
+      ArrayList<Integer> Resultado_Diferencia = Diferencia(a, c);
+      int elementosProductoCartesiano = Resultado_Union.size()*Resultado_Diferencia.size();
+      return elementosProductoCartesiano; // TODO
         }
 
         /*
@@ -219,7 +535,7 @@ class Entrega {
          * Podeu soposar que `a` i `rel` estan ordenats de menor a major (`rel` lexicogràficament).
          */
         static int exercici2(int[] a, int[][] rel) {
-            return -1; // TODO
+           return  Cardinal_Clausura_Equivalencia(a,  rel); // TODO
         }
 
         /*
@@ -229,7 +545,16 @@ class Entrega {
          * Podeu soposar que `a` i `rel` estan ordenats de menor a major (`rel` lexicogràficament).
          */
         static int exercici3(int[] a, int[][] rel) {
-            return -1; // TODO
+           if(reflexiva(a, rel) && Antisimetrica(rel) && transitiva(rel)&& OrdTotal(a, rel)){
+
+       // Construir el diagrama de Hasse
+       
+        return -1;
+      }else{
+
+      return -2;
+      }
+          // TODO
         }
 
 
